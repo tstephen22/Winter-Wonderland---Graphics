@@ -46,7 +46,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)\build\executables\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)\build\intermediate\$(Configuration)\</IntDir>
-    <IncludePath>C:\Users\theos\OneDrive\Desktop\College\4th Year\Graphics\glm;X:\College\4th Year\Graphics\glm;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\theos_000\Desktop\Graphics Project\glm;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)\build\executables\$(Configuration)\</OutDir>
@@ -83,11 +83,16 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="maths_funcs.cpp" />
+    <ClCompile Include="Mountains.cpp" />
+    <ClCompile Include="Snowman.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />
-    <ClInclude Include="Header.h" />
+    <ClInclude Include="MeshLoader.h" />
+    <ClInclude Include="Misc.h" />
     <ClInclude Include="maths_funcs.h" />
+    <ClInclude Include="Mountains.h" />
+    <ClInclude Include="Snowman.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

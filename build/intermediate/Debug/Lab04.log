@@ -1,10 +1,17 @@
 ﻿  main.cpp
-X:\College\4th Year\Graphics\Lab3\Lab 04 - Sample Object Hierarchy(1)\Lab 04 - Sample Object Hierarchy\Lab04\camera.h(122,1): warning C4305: 'initializing': truncation from 'double' to 'float'
-X:\College\4th Year\Graphics\Lab3\Lab 04 - Sample Object Hierarchy(1)\Lab 04 - Sample Object Hierarchy\Lab04\main.cpp(49,1): warning C5208: unnamed class used in typedef name cannot declare members other than non-static data members, member enumerations, or member classes
-X:\College\4th Year\Graphics\Lab3\Lab 04 - Sample Object Hierarchy(1)\Lab 04 - Sample Object Hierarchy\Lab04\main.cpp(518,38): warning C4305: 'argument': truncation from 'double' to 'float'
-X:\College\4th Year\Graphics\Lab3\Lab 04 - Sample Object Hierarchy(1)\Lab 04 - Sample Object Hierarchy\Lab04\main.cpp(521,35): warning C4305: 'argument': truncation from 'double' to 'float'
-X:\College\4th Year\Graphics\Lab3\Lab 04 - Sample Object Hierarchy(1)\Lab 04 - Sample Object Hierarchy\Lab04\main.cpp(524,36): warning C4305: 'argument': truncation from 'double' to 'float'
-X:\College\4th Year\Graphics\Lab3\Lab 04 - Sample Object Hierarchy(1)\Lab 04 - Sample Object Hierarchy\Lab04\main.cpp(527,39): warning C4305: 'argument': truncation from 'double' to 'float'
-X:\College\4th Year\Graphics\Lab3\Lab 04 - Sample Object Hierarchy(1)\Lab 04 - Sample Object Hierarchy\Lab04\main.cpp(539,10): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-X:\College\4th Year\Graphics\Lab3\Lab 04 - Sample Object Hierarchy(1)\Lab 04 - Sample Object Hierarchy\Lab04\main.cpp(540,10): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-  Lab04.vcxproj -> X:\College\4th Year\Graphics\Lab3\Lab 04 - Sample Object Hierarchy(1)\Lab 04 - Sample Object Hierarchy\build\executables\Debug\Lab 04.exe
+C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland---Graphics\Lab04\camera.h(122,1): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland---Graphics\Lab04\Misc.h(30,1): warning C5208: unnamed class used in typedef name cannot declare members other than non-static data members, member enumerations, or member classes
+C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland---Graphics\Lab04\main.cpp(432,38): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland---Graphics\Lab04\main.cpp(435,35): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland---Graphics\Lab04\main.cpp(438,36): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland---Graphics\Lab04\main.cpp(441,39): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland---Graphics\Lab04\main.cpp(453,10): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland---Graphics\Lab04\main.cpp(454,10): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland---Graphics\Lab04\main.cpp(462,17): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland---Graphics\Lab04\main.cpp(463,18): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland---Graphics\Lab04\main.cpp(467,17): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland---Graphics\Lab04\main.cpp(468,18): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+  Mountains.cpp
+C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland---Graphics\Lab04\Misc.h(30,1): warning C5208: unnamed class used in typedef name cannot declare members other than non-static data members, member enumerations, or member classes
+  Generating Code...
+  Lab04.vcxproj -> C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland---Graphics\build\executables\Debug\Lab 04.exe

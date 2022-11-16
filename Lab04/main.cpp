@@ -1,4 +1,5 @@
 // Windows includes (For Time, IO, etc.)
+#pragma region Imports
 #include <windows.h>
 #include <mmsystem.h>
 #include <iostream>
@@ -28,7 +29,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
+#include "Mountains.h"
+#pragma endregion Imports 
 
 
 /*----------------------------------------------------------------------------
@@ -44,19 +46,9 @@ MESH TO LOAD
 /*----------------------------------------------------------------------------
 ----------------------------------------------------------------------------*/
 
-#pragma region SimpleTypes
-typedef struct
-{
-	size_t mPointCount = 0;
-	std::vector<vec3> mVertices;
-	std::vector<vec3> mNormals;
-	std::vector<vec2> mTextureCoords;
-} ModelData;
-
-#pragma endregion SimpleTypes
-
 using namespace std;
 GLuint shaderProgramID;
+MeshLoader meshLoader = MeshLoader();
 
 ModelData snowman_data; 
 unsigned int snowman_vn_vbo = 0;
@@ -64,13 +56,10 @@ unsigned int snowman_vp_vbo = 0;
 unsigned int snowman_vao = 0;
 
 vec3 snowman_pos = vec3(0.0f, 0.5f, 0.0f); 
-vec3 left_arm_pos = vec3(0.0f, 0.0f, 0.0f);
-vec3 right_arm_pos = vec3(0.0f, 0.0f, 0.0f);
 int left_arm_distance = 0; 
 int right_arm_distance = 0;
 
-bool left_arm_up = false; 
-bool right_arm_up = false;
+
 ModelData hat_data;
 unsigned int hat_vn_vbo = 0;
 unsigned int hat_vp_vbo = 0;
@@ -86,10 +75,7 @@ unsigned int rightArm_vn_vbo = 0;
 unsigned int rightArm_vp_vbo = 0;
 unsigned int rightArm_vao = 0;
 
-ModelData mountains_data;
-unsigned int mountains_vn_vbo = 0;
-unsigned int mountains_vp_vbo = 0;
-unsigned int mountains_vao = 0;
+Mountains mountains; 
 
 int width = 1000;
 int height = 800;
@@ -105,65 +91,8 @@ unsigned int snowman_texture;
 unsigned int arm_texture; 
 unsigned int hat_texture; 
 unsigned int ground_texture; 
-#pragma region MESH LOADING
-/*----------------------------------------------------------------------------
-MESH LOADING FUNCTION
-----------------------------------------------------------------------------*/
 
-ModelData load_mesh(const char* file_name) {
-	ModelData modelData;
-
-	/* Use assimp to read the model file, forcing it to be read as    */
-	/* triangles. The second flag (aiProcess_PreTransformVertices) is */
-	/* relevant if there are multiple meshes in the model file that   */
-	/* are offset from the origin. This is pre-transform them so      */
-	/* they're in the right position.                                 */
-	const aiScene* scene = aiImportFile(
-		file_name, 
-		aiProcess_Triangulate | aiProcess_PreTransformVertices
-	); 
-
-	if (!scene) {
-		fprintf(stderr, "ERROR: reading mesh %s\n", file_name);
-		return modelData;
-	}
-
-	printf("  %i materials\n", scene->mNumMaterials);
-	printf("  %i meshes\n", scene->mNumMeshes);
-	printf("  %i textures\n", scene->mNumTextures);
-
-	for (unsigned int m_i = 0; m_i < scene->mNumMeshes; m_i++) {
-		const aiMesh* mesh = scene->mMeshes[m_i];
-		printf("    %i vertices in mesh\n", mesh->mNumVertices);
-		modelData.mPointCount += mesh->mNumVertices;
-		for (unsigned int v_i = 0; v_i < mesh->mNumVertices; v_i++) {
-			if (mesh->HasPositions()) {
-				const aiVector3D* vp = &(mesh->mVertices[v_i]);
-				modelData.mVertices.push_back(vec3(vp->x, vp->y, vp->z));
-			}
-			if (mesh->HasNormals()) {
-				const aiVector3D* vn = &(mesh->mNormals[v_i]);
-				modelData.mNormals.push_back(vec3(vn->x, vn->y, vn->z));
-			}
-			if (mesh->HasTextureCoords(0)) {
-				const aiVector3D* vt = &(mesh->mTextureCoords[0][v_i]);
-				modelData.mTextureCoords.push_back(vec2(vt->x, vt->y));
-			}
-			if (mesh->HasTangentsAndBitangents()) {
-				/* You can extract tangents and bitangents here              */
-				/* Note that you might need to make Assimp generate this     */
-				/* data for you. Take a look at the flags that aiImportFile  */
-				/* can take.                                                 */
-			}
-		}
-	}
-
-	aiReleaseImport(scene);
-	return modelData;
-}
-
-#pragma endregion MESH LOADING
-
+bool firstMouse = true; 
 // Shader Functions- click on + to expand
 #pragma region SHADER_FUNCTIONS
 char* readShaderSource(const char* shaderFile) {
@@ -278,17 +207,10 @@ void generateObjectBufferMesh() {
 	//Note: you may get an error "vector subscript out of range" if you are using this code for a mesh that doesnt have positions and normals
 	//Might be an idea to do a check for that before generating and binding the buffer.
 	//LOADING MOUNTAINS 
-	mountains_data = load_mesh(MOUNTAIN);
-
-	glGenBuffers(1, &mountains_vp_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, mountains_vp_vbo);
-	glBufferData(GL_ARRAY_BUFFER, mountains_data.mPointCount * sizeof(vec3), &mountains_data.mVertices[0], GL_STATIC_DRAW);
-	glGenBuffers(1, &mountains_vn_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, mountains_vn_vbo);
-	glBufferData(GL_ARRAY_BUFFER, mountains_data.mPointCount * sizeof(vec3), &mountains_data.mNormals[0], GL_STATIC_DRAW);
-	
+	mountains = Mountains(0.0f, 0.0f, 0.0f, shaderProgramID); 
+	mountains.init(); 
 	//LOADING SNOWMAN
-	snowman_data = load_mesh(SNOWMAN);
+	snowman_data = meshLoader.load_mesh(SNOWMAN);
 
 	glGenBuffers(1, &snowman_vp_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, snowman_vp_vbo);
@@ -310,7 +232,7 @@ void generateObjectBufferMesh() {
 	//	glVertexAttribPointer (loc3, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 
 	//LOADING LEFT HAND 
-	leftArm_data = load_mesh(LEFT_ARM);
+	leftArm_data = meshLoader.load_mesh(LEFT_ARM);
 
 	glGenBuffers(1, &leftArm_vp_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, leftArm_vp_vbo);
@@ -320,7 +242,7 @@ void generateObjectBufferMesh() {
 	glBufferData(GL_ARRAY_BUFFER, leftArm_data.mPointCount * sizeof(vec3), &leftArm_data.mNormals[0], GL_STATIC_DRAW);
 
 	//LOADING RIGHT HAND 
-	rightArm_data = load_mesh(RIGHT_ARM);
+	rightArm_data = meshLoader.load_mesh(RIGHT_ARM);
 
 	glGenBuffers(1, &rightArm_vp_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, rightArm_vp_vbo);
@@ -330,7 +252,7 @@ void generateObjectBufferMesh() {
 	glBufferData(GL_ARRAY_BUFFER, rightArm_data.mPointCount * sizeof(vec3), &rightArm_data.mNormals[0], GL_STATIC_DRAW);
 
 	//LOADING HAT ----------------------------------------------------------------------------
-	hat_data = load_mesh(HAT);
+	hat_data = meshLoader.load_mesh(HAT);
 
 	glGenBuffers(1, &hat_vp_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, hat_vp_vbo);
@@ -377,17 +299,7 @@ void display() {
 	glUniformMatrix4fv(proj_mat_location, 1, GL_FALSE, persp_proj.m);
 	glUniformMatrix4fv(view_mat_location, 1, GL_FALSE, view.m);
 	
-	mat4 mountains = identity_mat4();
-	mountains = translate(mountains, vec3(0.0f, 0.0f, 0.0f));
-	glEnableVertexAttribArray(loc1);
-	glBindBuffer(GL_ARRAY_BUFFER, mountains_vp_vbo);
-	glVertexAttribPointer(loc1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(loc2);
-	glBindBuffer(GL_ARRAY_BUFFER, mountains_vn_vbo);
-	glVertexAttribPointer(loc2, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-
-	glUniformMatrix4fv(matrix_location, 1, GL_FALSE, mountains.m);
-	glDrawArrays(GL_TRIANGLES, 3, mountains_data.mPointCount);
+	mountains.draw(); 
 	
 
 	mat4 snowman = identity_mat4();
@@ -471,7 +383,6 @@ void updateScene() {
 		last_time = curr_time;
 	float delta = (curr_time - last_time) * 0.001f;
 	last_time = curr_time;
-
 	// Rotate the model slowly around the y axis at 20 degrees per second
 	rotate_y += 80.0f * delta;
 	rotate_y = fmodf(rotate_y, 360.0f);
@@ -507,7 +418,7 @@ void updateScene() {
 void init()
 {
 	// Set up the shaders
-	GLuint shaderProgramID = CompileShaders();
+	shaderProgramID = CompileShaders();
 	// load mesh into a vertex buffer array
 	generateObjectBufferMesh();
 
@@ -540,6 +451,20 @@ void mouseCallback(int x, int y) {
 	lastY = y;
 
 	camera.ProcessMouseMovement(xoffset, yoffset);
+
+	glutPostRedisplay();
+
+	//this is the main thing that keeps it from leaving the screen
+	if (x < 100 || x > width - 100) {  //you can use values other than 100 for the screen edges if you like, kind of seems to depend on your mouse sensitivity for what ends up working best
+		lastX = width / 2;   //centers the last known position, this way there isn't an odd jump with your cam as it resets
+		lastY = height / 2;
+		glutWarpPointer(width / 2, height / 2);  //centers the cursor
+	}
+	else if (y < 100 || y > height - 100) {
+		lastX = width / 2;
+		lastY = height / 2;
+		glutWarpPointer(width / 2, height / 2);
+	}
 }
 void mouse(int button, int state, int x, int y)
 {
@@ -551,13 +476,14 @@ void mouse(int button, int state, int x, int y)
 	}
 }
 
+
 int main(int argc, char** argv) {
 
 	// Set up the window
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
 	glutInitWindowSize(width, height);
-	glutCreateWindow("Hello Umbreon");
+	glutCreateWindow("Winter Wonderland");
 
 	// Tell glut where the display function is
 	glutDisplayFunc(display);
@@ -565,7 +491,7 @@ int main(int argc, char** argv) {
 	glutKeyboardFunc(keypress);
 	glutPassiveMotionFunc(mouseCallback);
 	glutMouseFunc(mouse);
-
+	glutSetCursor(GLUT_CURSOR_NONE);
 	// A call to glewInit() must be done after glut is initialized!
 	GLenum res = glewInit();
 	// Check for any errors
