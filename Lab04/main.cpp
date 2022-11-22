@@ -30,6 +30,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Mountains.h"
+#include "Snowman.h"
 #pragma endregion Imports 
 
 
@@ -76,6 +77,7 @@ unsigned int rightArm_vp_vbo = 0;
 unsigned int rightArm_vao = 0;
 
 Mountains mountains; 
+Snowman snowman; 
 
 int width = 1000;
 int height = 800;
@@ -210,14 +212,8 @@ void generateObjectBufferMesh() {
 	mountains = Mountains(0.0f, 0.0f, 0.0f, shaderProgramID); 
 	mountains.init(); 
 	//LOADING SNOWMAN
-	snowman_data = meshLoader.load_mesh(SNOWMAN);
-
-	glGenBuffers(1, &snowman_vp_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, snowman_vp_vbo);
-	glBufferData(GL_ARRAY_BUFFER, snowman_data.mPointCount * sizeof(vec3), &snowman_data.mVertices[0], GL_STATIC_DRAW);
-	glGenBuffers(1, &snowman_vn_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, snowman_vn_vbo);
-	glBufferData(GL_ARRAY_BUFFER, snowman_data.mPointCount * sizeof(vec3), &snowman_data.mNormals[0], GL_STATIC_DRAW);
+	snowman = Snowman(0.0f, 0.0f, 0.0f, -90, shaderProgramID); 
+	snowman.init(); 
 
 	//	This is for texture coordinates which you don't currently need, so I have commented it out
 	//	unsigned int vt_vbo = 0;
@@ -232,34 +228,7 @@ void generateObjectBufferMesh() {
 	//	glVertexAttribPointer (loc3, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 
 	//LOADING LEFT HAND 
-	leftArm_data = meshLoader.load_mesh(LEFT_ARM);
-
-	glGenBuffers(1, &leftArm_vp_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, leftArm_vp_vbo);
-	glBufferData(GL_ARRAY_BUFFER, leftArm_data.mPointCount * sizeof(vec3), &leftArm_data.mVertices[0], GL_STATIC_DRAW);
-	glGenBuffers(1, &leftArm_vn_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, leftArm_vn_vbo);
-	glBufferData(GL_ARRAY_BUFFER, leftArm_data.mPointCount * sizeof(vec3), &leftArm_data.mNormals[0], GL_STATIC_DRAW);
-
-	//LOADING RIGHT HAND 
-	rightArm_data = meshLoader.load_mesh(RIGHT_ARM);
-
-	glGenBuffers(1, &rightArm_vp_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, rightArm_vp_vbo);
-	glBufferData(GL_ARRAY_BUFFER, rightArm_data.mPointCount * sizeof(vec3), &rightArm_data.mVertices[0], GL_STATIC_DRAW);
-	glGenBuffers(1, &rightArm_vn_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, rightArm_vn_vbo);
-	glBufferData(GL_ARRAY_BUFFER, rightArm_data.mPointCount * sizeof(vec3), &rightArm_data.mNormals[0], GL_STATIC_DRAW);
-
-	//LOADING HAT ----------------------------------------------------------------------------
-	hat_data = meshLoader.load_mesh(HAT);
-
-	glGenBuffers(1, &hat_vp_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, hat_vp_vbo);
-	glBufferData(GL_ARRAY_BUFFER, hat_data.mPointCount * sizeof(vec3), &hat_data.mVertices[0], GL_STATIC_DRAW);
-	glGenBuffers(1, &hat_vn_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, hat_vn_vbo);
-	glBufferData(GL_ARRAY_BUFFER, hat_data.mPointCount * sizeof(vec3), &hat_data.mNormals[0], GL_STATIC_DRAW);
+	
 
 	//	This is for texture coordinates which you don't currently need, so I have commented it out
 	//	unsigned int vt_vbo = 0;
@@ -302,59 +271,7 @@ void display() {
 	mountains.draw(); 
 	
 
-	mat4 snowman = identity_mat4();
-	snowman = translate(snowman, snowman_pos);
-	snowman = rotate_y_deg(snowman, -90);
-	glEnableVertexAttribArray(loc1);
-	glBindBuffer(GL_ARRAY_BUFFER, snowman_vp_vbo);
-	glVertexAttribPointer(loc1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(loc2);
-	glBindBuffer(GL_ARRAY_BUFFER, snowman_vn_vbo);
-	glVertexAttribPointer(loc2, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-
-	glUniformMatrix4fv(matrix_location, 1, GL_FALSE, snowman.m);
-	glDrawArrays(GL_TRIANGLES, 3, snowman_data.mPointCount);
-
-	mat4 hat = identity_mat4();
-	hat = translate(hat, vec3(0.0f, 3.5f, 0.0f));
-	hat = rotate_y_deg(hat, rotate_y);
-	hat = snowman * hat;
-	glEnableVertexAttribArray(loc1);
-	glBindBuffer(GL_ARRAY_BUFFER, hat_vp_vbo);
-	glVertexAttribPointer(loc1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(loc2);
-	glBindBuffer(GL_ARRAY_BUFFER, hat_vn_vbo);
-	glVertexAttribPointer(loc2, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-
-	glUniformMatrix4fv(matrix_location, 1, GL_FALSE, hat.m);
-	glDrawArrays(GL_TRIANGLES, 3, hat_data.mPointCount);
-
-	mat4 leftArm = identity_mat4();
-	leftArm = translate(leftArm, left_arm_pos);
-	leftArm = snowman * leftArm;
-	glEnableVertexAttribArray(loc1);
-	glBindBuffer(GL_ARRAY_BUFFER, leftArm_vp_vbo);
-	glVertexAttribPointer(loc1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(loc2);
-	glBindBuffer(GL_ARRAY_BUFFER, leftArm_vn_vbo);
-	glVertexAttribPointer(loc2, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-
-	glUniformMatrix4fv(matrix_location, 1, GL_FALSE, leftArm.m);
-	glDrawArrays(GL_TRIANGLES, 3, leftArm_data.mPointCount);
-
-	mat4 rightArm = identity_mat4();
-	rightArm = translate(rightArm, right_arm_pos);
-	
-	rightArm = snowman * rightArm;
-	glEnableVertexAttribArray(loc1);
-	glBindBuffer(GL_ARRAY_BUFFER, rightArm_vp_vbo);
-	glVertexAttribPointer(loc1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(loc2);
-	glBindBuffer(GL_ARRAY_BUFFER, rightArm_vn_vbo);
-	glVertexAttribPointer(loc2, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-
-	glUniformMatrix4fv(matrix_location, 1, GL_FALSE, rightArm.m);
-	glDrawArrays(GL_TRIANGLES, 3, rightArm_data.mPointCount);
+	snowman.draw();
 
 	//// Set up the child matrix
 	//mat4 modelChild = identity_mat4();
@@ -377,39 +294,7 @@ void display() {
 
 void updateScene() {
 
-	static DWORD last_time = 0;
-	DWORD curr_time = timeGetTime();
-	if (last_time == 0)
-		last_time = curr_time;
-	float delta = (curr_time - last_time) * 0.001f;
-	last_time = curr_time;
-	// Rotate the model slowly around the y axis at 20 degrees per second
-	rotate_y += 80.0f * delta;
-	rotate_y = fmodf(rotate_y, 360.0f);
-	if (left_arm_distance < 700) {
-		left_arm_distance++;
-	}
-	else {
-		left_arm_distance = 0;
-		left_arm_up = !left_arm_up;
-	}
-
-	if (left_arm_up) left_arm_pos.v[1] += 0.0001f; 
-	else left_arm_pos.v[1] -= 0.0001f;
-
-	if (right_arm_distance < 400) {
-		right_arm_distance++;
-	}
-	else {
-		right_arm_distance = 0;
-		right_arm_up = !right_arm_up;
-	}
-
-	if (right_arm_up) right_arm_pos.v[1] += 0.0001f;
-	else right_arm_pos.v[1] -= 0.0001f;
-
-	snowman_pos.v[2] += 0.0001f; 
-
+	snowman.update();
 	// Draw the next frame
 	glutPostRedisplay();
 }
