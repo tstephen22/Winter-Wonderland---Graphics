@@ -1,0 +1,5 @@
+﻿  main.cpp
+C:\Users\theos\OneDrive\Desktop\College\4th Year\Graphics\Lab3\Lab 04 - Sample Object Hierarchy(1)\Lab 04 - Sample Object Hierarchy\Lab04\main.cpp(90,70): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\theos\OneDrive\Desktop\College\4th Year\Graphics\Lab3\Lab 04 - Sample Object Hierarchy(1)\Lab 04 - Sample Object Hierarchy\Lab04\main.cpp(90,55): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+C:\Users\theos\OneDrive\Desktop\College\4th Year\Graphics\Lab3\Lab 04 - Sample Object Hierarchy(1)\Lab 04 - Sample Object Hierarchy\Lab04\main.cpp(90,42): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+  Lab04.vcxproj -> C:\Users\theos\OneDrive\Desktop\College\4th Year\Graphics\Lab3\Lab 04 - Sample Object Hierarchy(1)\Lab 04 - Sample Object Hierarchy\x64\Debug\Lab 04.exe

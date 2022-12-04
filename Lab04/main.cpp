@@ -1,392 +1,203 @@
-// Windows includes (For Time, IO, etc.)
-#pragma region Imports
-#include <windows.h>
-#include <mmsystem.h>
-#include <iostream>
-#include <string>
-#include <stdio.h>
-#include <math.h>
-#include <vector> // STL dynamic memory.
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
-// OpenGL includes
-#include <GL/glew.h>
-#include <GL/freeglut.h>
-
-// Assimp includes
-#include <assimp/cimport.h> // scene importer
-#include <assimp/scene.h> // collects data
-#include <assimp/postprocess.h> // various extra operations
-
-
-//glm includes 
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/glm.hpp>
-// Project includes
-#include "maths_funcs.h"
-#include "camera.h"
-
-// 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "Mountains.h"
+
+#include "shader_m.h"
+#include "camera.h"
+#include "model.h"
 #include "Snowman.h"
-#pragma endregion Imports 
+#include "file_system.h"
+#include <iostream>
 
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void processInput(GLFWwindow* window);
 
-/*----------------------------------------------------------------------------
-MESH TO LOAD
-----------------------------------------------------------------------------*/
-// this mesh is a dae file format but you should be able to use any other format too, obj is typically what is used
-// put the mesh in your project directory, or provide a filepath for it here
-#define SNOWMAN "snowman.dae"
-#define HAT "hat.obj"
-#define LEFT_ARM "ArmLeft.dae"
-#define RIGHT_ARM "ArmRight.dae"
-#define MOUNTAIN "mountains.dae"
-/*----------------------------------------------------------------------------
-----------------------------------------------------------------------------*/
+// settings
+const unsigned int SCR_WIDTH = 1600;
+const unsigned int SCR_HEIGHT = 1200;
 
-using namespace std;
-GLuint shaderProgramID;
-MeshLoader meshLoader = MeshLoader();
+// camera
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+float lastX = SCR_WIDTH / 2.0f;
+float lastY = SCR_HEIGHT / 2.0f;
+bool firstMouse = true;
 
-ModelData snowman_data; 
-unsigned int snowman_vn_vbo = 0;
-unsigned int snowman_vp_vbo = 0;
-unsigned int snowman_vao = 0;
-
-vec3 snowman_pos = vec3(0.0f, 0.5f, 0.0f); 
-int left_arm_distance = 0; 
-int right_arm_distance = 0;
-
-
-ModelData hat_data;
-unsigned int hat_vn_vbo = 0;
-unsigned int hat_vp_vbo = 0;
-unsigned int hat_vao = 0;
-
-ModelData leftArm_data;
-unsigned int leftArm_vn_vbo = 0;
-unsigned int leftArm_vp_vbo = 0;
-unsigned int leftArm_vao = 0;
-
-ModelData rightArm_data;
-unsigned int rightArm_vn_vbo = 0;
-unsigned int rightArm_vp_vbo = 0;
-unsigned int rightArm_vao = 0;
-
-Mountains mountains; 
-Snowman snowman; 
-
-int width = 1000;
-int height = 800;
-
-GLuint loc1, loc2, loc3;
-GLfloat rotate_y = 0.0f;
-GLfloat rotate_arm = 0.0f;
-
-Camera camera(vec3(0.0f, 0.0f, 3.0f));
-float lastX = width / 2.0f;
-float lastY = height / 2.0f;
-unsigned int snowman_texture; 
-unsigned int arm_texture; 
-unsigned int hat_texture; 
-unsigned int ground_texture; 
-
-bool firstMouse = true; 
-// Shader Functions- click on + to expand
-#pragma region SHADER_FUNCTIONS
-char* readShaderSource(const char* shaderFile) {
-	FILE* fp;
-	fopen_s(&fp, shaderFile, "rb");
-
-	if (fp == NULL) { return NULL; }
-
-	fseek(fp, 0L, SEEK_END);
-	long size = ftell(fp);
-
-	fseek(fp, 0L, SEEK_SET);
-	char* buf = new char[size + 1];
-	fread(buf, 1, size, fp);
-	buf[size] = '\0';
-
-	fclose(fp);
-
-	return buf;
-}
-
-
-static void AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
+// timing
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
+int SNOWMEN_COUNT = 3;
+vector<Snowman> SNOWMEN;
+int main()
 {
-	// create a shader object
-	GLuint ShaderObj = glCreateShader(ShaderType);
+    // glfw: initialize and configure
+    // ------------------------------
+    glfwInit();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	if (ShaderObj == 0) {
-		std::cerr << "Error creating shader..." << std::endl;
-		std::cerr << "Press enter/return to exit..." << std::endl;
-		std::cin.get();
-		exit(1);
-	}
-	const char* pShaderSource = readShaderSource(pShaderText);
+#ifdef __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
 
-	// Bind the source code to the shader, this happens before compilation
-	glShaderSource(ShaderObj, 1, (const GLchar**)&pShaderSource, NULL);
-	// compile the shader and check for errors
-	glCompileShader(ShaderObj);
-	GLint success;
-	// check for shader related errors using glGetShaderiv
-	glGetShaderiv(ShaderObj, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		GLchar InfoLog[1024] = { '\0' };
-		glGetShaderInfoLog(ShaderObj, 1024, NULL, InfoLog);
-		std::cerr << "Error compiling "
-			<< (ShaderType == GL_VERTEX_SHADER ? "vertex" : "fragment")
-			<< " shader program: " << InfoLog << std::endl;
-		std::cerr << "Press enter/return to exit..." << std::endl;
-		std::cin.get();
-		exit(1);
-	}
-	// Attach the compiled shader object to the program object
-	glAttachShader(ShaderProgram, ShaderObj);
+    // glfw window creation
+    // --------------------
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+    if (window == NULL)
+    {
+        std::cout << "Failed to create GLFW window" << std::endl;
+        glfwTerminate();
+        return -1;
+    }
+    glfwMakeContextCurrent(window);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+
+    // tell GLFW to capture our mouse
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    // glad: load all OpenGL function pointers
+    // ---------------------------------------
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
+        std::cout << "Failed to initialize GLAD" << std::endl;
+        return -1;
+    }
+
+    // tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
+    stbi_set_flip_vertically_on_load(true);
+
+    // configure global opengl state
+    // -----------------------------
+    glEnable(GL_DEPTH_TEST);
+
+    // build and compile shaders
+    // -------------------------
+    Shader ourShader("vertex.vs", "fragment.fs");
+
+    // load models
+    // -----------
+    Model ourModel(FileSystem::getPath("mountains.obj"));
+    Snowman snowman(0.0, 0.0, 0.0, 1.0, 1.0); 
+    for (int i = 0; i < SNOWMEN_COUNT; i++) {
+        for (int j = 0; j < SNOWMEN_COUNT; j++) {
+            SNOWMEN.push_back(Snowman(-1 + i, 0.0, 2.0+j, -180.0, 0.1));
+        }
+    }
+
+    // draw in wireframe
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    // render loop
+    // -----------
+    while (!glfwWindowShouldClose(window))
+    {
+        // per-frame time logic
+        // --------------------
+        float currentFrame = static_cast<float>(glfwGetTime());
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+   
+        // input
+        // -----
+        processInput(window);
+
+        // render
+        // ------
+        glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // don't forget to enable shader before setting uniforms
+        ourShader.use();
+
+        // view/projection transformations
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 view = camera.GetViewMatrix();
+        ourShader.setMat4("projection", projection);
+        ourShader.setMat4("view", view);
+
+        // render the loaded model
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+        ourShader.setMat4("model", model);
+        ourModel.Draw(ourShader);
+
+        snowman.draw(ourShader);
+        for (int i = 0; i < SNOWMEN.size(); i++) {
+            SNOWMEN[i].bow();
+            SNOWMEN[i].draw(ourShader);
+        }
+
+        // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+        // -------------------------------------------------------------------------------
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+
+    // glfw: terminate, clearing all previously allocated GLFW resources.
+    // ------------------------------------------------------------------
+    glfwTerminate();
+    return 0;
 }
 
-GLuint CompileShaders()
+// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
+// ---------------------------------------------------------------------------------------------------------
+void processInput(GLFWwindow* window)
 {
-	//Start the process of setting up our shaders by creating a program ID
-	//Note: we will link all the shaders together into this ID
-	shaderProgramID = glCreateProgram();
-	if (shaderProgramID == 0) {
-		std::cerr << "Error creating shader program..." << std::endl;
-		std::cerr << "Press enter/return to exit..." << std::endl;
-		std::cin.get();
-		exit(1);
-	}
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
 
-	// Create two shader objects, one for the vertex, and one for the fragment shader
-	AddShader(shaderProgramID, "simpleVertexShader.txt", GL_VERTEX_SHADER);
-	AddShader(shaderProgramID, "simpleFragmentShader.txt", GL_FRAGMENT_SHADER);
-
-	GLint Success = 0;
-	GLchar ErrorLog[1024] = { '\0' };
-	// After compiling all shader objects and attaching them to the program, we can finally link it
-	glLinkProgram(shaderProgramID);
-	// check for program related errors using glGetProgramiv
-	glGetProgramiv(shaderProgramID, GL_LINK_STATUS, &Success);
-	if (Success == 0) {
-		glGetProgramInfoLog(shaderProgramID, sizeof(ErrorLog), NULL, ErrorLog);
-		std::cerr << "Error linking shader program: " << ErrorLog << std::endl;
-		std::cerr << "Press enter/return to exit..." << std::endl;
-		std::cin.get();
-		exit(1);
-	}
-
-	// program has been successfully linked but needs to be validated to check whether the program can execute given the current pipeline state
-	glValidateProgram(shaderProgramID);
-	// check for program related errors using glGetProgramiv
-	glGetProgramiv(shaderProgramID, GL_VALIDATE_STATUS, &Success);
-	if (!Success) {
-		glGetProgramInfoLog(shaderProgramID, sizeof(ErrorLog), NULL, ErrorLog);
-		std::cerr << "Invalid shader program: " << ErrorLog << std::endl;
-		std::cerr << "Press enter/return to exit..." << std::endl;
-		std::cin.get();
-		exit(1);
-	}
-	// Finally, use the linked shader program
-	// Note: this program will stay in effect for all draw calls until you replace it with another or explicitly disable its use
-	glUseProgram(shaderProgramID);
-	return shaderProgramID;
-}
-#pragma endregion SHADER_FUNCTIONS
-
-// VBO Functions - click on + to expand
-#pragma region VBO_FUNCTIONS
-void generateObjectBufferMesh() {
-	/*----------------------------------------------------------------------------
-	LOAD MESH HERE AND COPY INTO BUFFERS
-	----------------------------------------------------------------------------*/
-
-	//Note: you may get an error "vector subscript out of range" if you are using this code for a mesh that doesnt have positions and normals
-	//Might be an idea to do a check for that before generating and binding the buffer.
-	//LOADING MOUNTAINS 
-	mountains = Mountains(0.0f, 0.0f, 0.0f, shaderProgramID); 
-	mountains.init(); 
-	//LOADING SNOWMAN
-	snowman = Snowman(0.0f, 0.0f, 0.0f, -90, shaderProgramID); 
-	snowman.init(); 
-
-	//	This is for texture coordinates which you don't currently need, so I have commented it out
-	//	unsigned int vt_vbo = 0;
-	//	glGenBuffers (1, &vt_vbo);
-	//	glBindBuffer (GL_ARRAY_BUFFER, vt_vbo);
-	//	glBufferData (GL_ARRAY_BUFFER, monkey_head_data.mTextureCoords * sizeof (vec2), &monkey_head_data.mTextureCoords[0], GL_STATIC_DRAW);
-
-
-	//	This is for texture coordinates which you don't currently need, so I have commented it out
-	//	glEnableVertexAttribArray (loc3);
-	//	glBindBuffer (GL_ARRAY_BUFFER, vt_vbo);
-	//	glVertexAttribPointer (loc3, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-
-	//LOADING LEFT HAND 
-	
-
-	//	This is for texture coordinates which you don't currently need, so I have commented it out
-	//	unsigned int vt_vbo = 0;
-	//	glGenBuffers (1, &vt_vbo);
-	//	glBindBuffer (GL_ARRAY_BUFFER, vt_vbo);
-	//	glBufferData (GL_ARRAY_BUFFER, monkey_head_data.mTextureCoords * sizeof (vec2), &monkey_head_data.mTextureCoords[0], GL_STATIC_DRAW);
-
-}
-#pragma endregion VBO_FUNCTIONS
-
-
-void display() {
-
-	// tell GL to only draw onto a pixel if the shape is closer to the viewer
-	glEnable(GL_DEPTH_TEST); // enable depth-testing
-	glDepthFunc(GL_LESS); // depth-testing interprets a smaller value as "closer"
-	glClearColor(0.6f, 0.6f, 0.6f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glUseProgram(shaderProgramID);
-
-
-	//Declare your uniform variables that will be used in your shader
-	int matrix_location = glGetUniformLocation(shaderProgramID, "model");
-	int view_mat_location = glGetUniformLocation(shaderProgramID, "view");
-	int proj_mat_location = glGetUniformLocation(shaderProgramID, "proj");
-
-	loc1 = glGetAttribLocation(shaderProgramID, "vertex_position");
-	loc2 = glGetAttribLocation(shaderProgramID, "vertex_normal");
-	loc3 = glGetAttribLocation(shaderProgramID, "vertex_texture");
-
-	// Root of the Hierarchy
-	mat4 view = camera.GetViewMatrix(); 
-	mat4 persp_proj = perspective(camera.Zoom, (float)width / (float)height, 0.1f, 1000.0f);
-	view = translate(view, vec3(0.0, 0.0, -10.0f));
-
-	// update uniforms & draw
-	glUniformMatrix4fv(proj_mat_location, 1, GL_FALSE, persp_proj.m);
-	glUniformMatrix4fv(view_mat_location, 1, GL_FALSE, view.m);
-	
-	mountains.draw(); 
-	
-
-	snowman.draw();
-
-	//// Set up the child matrix
-	//mat4 modelChild = identity_mat4();
-	//modelChild = rotate_z_deg(modelChild, 180);
-	//modelChild = rotate_y_deg(modelChild, rotate_y);
-	//modelChild = translate(modelChild, vec3(0.0f, 1.9f, 0.0f));
-
-	//// Apply the root matrix to the child matrix
-	//modelChild = model * modelChild;
-
-	//// Update the appropriate uniform and draw the mesh again
-	//glUniformMatrix4fv(matrix_location, 1, GL_FALSE, modelChild.m);
-	//glDrawArrays(GL_TRIANGLES, 0, mesh_data.mPointCount);
-	
-	
-	//glDrawArrays(GL_TRIANGLES, 0, snowman_data.mPointCount);
-	glutSwapBuffers();
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        camera.ProcessKeyboard(FORWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        camera.ProcessKeyboard(BACKWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        camera.ProcessKeyboard(LEFT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        camera.ProcessKeyboard(RIGHT, deltaTime);
 }
 
-
-void updateScene() {
-
-	snowman.update();
-	// Draw the next frame
-	glutPostRedisplay();
-}
-
-
-void init()
+// glfw: whenever the window size changed (by OS or user resize) this callback function executes
+// ---------------------------------------------------------------------------------------------
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-	// Set up the shaders
-	shaderProgramID = CompileShaders();
-	// load mesh into a vertex buffer array
-	generateObjectBufferMesh();
-
+    // make sure the viewport matches the new window dimensions; note that width and 
+    // height will be significantly larger than specified on retina displays.
+    glViewport(0, 0, width, height);
 }
 
-void keypress(unsigned char key, int x, int y) {
-	if (key == 'w') {
-		camera.ProcessKeyboard(FORWARD, 0.2);
-	}
-	else if (key == 'a') {
-		camera.ProcessKeyboard(LEFT, 0.2);
-	}
-	else if (key == 'd') {
-		camera.ProcessKeyboard(RIGHT, 0.2);
-	}
-	else if (key == 's') {
-		camera.ProcessKeyboard(BACKWARD, 0.2);
-	}
-	else if (key == 'm') {
-		rotate_y += 10.0f;
-		rotate_y = fmodf(rotate_y, 360.0f);
-	}
-}
-void mouseCallback(int x, int y) {
-
-	float xoffset = x - lastX;
-	float yoffset = lastY - y; // reversed since y-coordinates go from bottom to top
-
-	lastX = x;
-	lastY = y;
-
-	camera.ProcessMouseMovement(xoffset, yoffset);
-
-	glutPostRedisplay();
-
-	//this is the main thing that keeps it from leaving the screen
-	if (x < 100 || x > width - 100) {  //you can use values other than 100 for the screen edges if you like, kind of seems to depend on your mouse sensitivity for what ends up working best
-		lastX = width / 2;   //centers the last known position, this way there isn't an odd jump with your cam as it resets
-		lastY = height / 2;
-		glutWarpPointer(width / 2, height / 2);  //centers the cursor
-	}
-	else if (y < 100 || y > height - 100) {
-		lastX = width / 2;
-		lastY = height / 2;
-		glutWarpPointer(width / 2, height / 2);
-	}
-}
-void mouse(int button, int state, int x, int y)
+// glfw: whenever the mouse moves, this callback is called
+// -------------------------------------------------------
+void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
-	if (button == 4) {
-		camera.ProcessMouseScroll(2.0f);
-	}
-	if (button == 3) {
-		camera.ProcessMouseScroll(-2.0f);
-	}
+    float xpos = static_cast<float>(xposIn);
+    float ypos = static_cast<float>(yposIn);
+
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+
+    lastX = xpos;
+    lastY = ypos;
+
+    camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
-
-int main(int argc, char** argv) {
-
-	// Set up the window
-	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-	glutInitWindowSize(width, height);
-	glutCreateWindow("Winter Wonderland");
-
-	// Tell glut where the display function is
-	glutDisplayFunc(display);
-	glutIdleFunc(updateScene);
-	glutKeyboardFunc(keypress);
-	glutPassiveMotionFunc(mouseCallback);
-	glutMouseFunc(mouse);
-	glutSetCursor(GLUT_CURSOR_NONE);
-	// A call to glewInit() must be done after glut is initialized!
-	GLenum res = glewInit();
-	// Check for any errors
-	if (res != GLEW_OK) {
-		fprintf(stderr, "Error: '%s'\n", glewGetErrorString(res));
-		return 1;
-	}
-	// Set up your objects and shaders
-	init();
-	// Begin infinite event loop
-	glutMainLoop();
-	return 0;
+// glfw: whenever the mouse scroll wheel scrolls, this callback is called
+// ----------------------------------------------------------------------
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }

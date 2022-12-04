@@ -1,196 +1,93 @@
-#include "MeshLoader.h"
 #pragma once
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
-#define SNOWMAN "snowman.dae"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+#include "shader_m.h"
+#include "camera.h"
+#include "model.h"
+#include "file_system.h"
+#include <iostream>
+
+#define SNOWMAN "snowman_body.obj"
 #define HAT "hat.obj"
-#define LEFT_ARM "ArmLeft.dae"
-#define RIGHT_ARM "ArmRight.dae"
+#define LEFT_ARM "ArmLeft.obj"
+#define RIGHT_ARM "ArmRight.obj"
+class Snowman {
+public: 
 
-class Snowman
-{
-public:
-	ModelData body_model; 
-	ModelData hat_model; 
-	ModelData leftArm_model; 
-	ModelData rightArm_model; 
-	Snowman() {
+	Model body; 
+	Model rightArm; 
+	Model leftArm; 
+	Model hat; 
 
+	Snowman(float x, float y, float z, GLfloat angle, float size) {
+		this->posX = x; this->posY = y; this->posZ = z; 
+		this->angle = angle; 
+		this->body = Model(FileSystem::getPath(SNOWMAN));
+		this->hat = Model(FileSystem::getPath(HAT));
+		this->rightArm = Model(FileSystem::getPath(RIGHT_ARM));
+		this->leftArm = Model(FileSystem::getPath(LEFT_ARM));
+		this->size = size; 
 	}
-	Snowman(float x, float y, float z, GLfloat angle, GLuint shaderProgramID) {
-		this->snowman_pos = vec3(x, y, x); this->angle = angle;
-		loc1 = glGetAttribLocation(shaderProgramID, "vertex_position");
-		loc2 = glGetAttribLocation(shaderProgramID, "vertex_normal");
-		loc3 = glGetAttribLocation(shaderProgramID, "vertex_texture");
-	}
-	void init() {
-		//Loading body 
-		body_model = meshLoader.load_mesh(SNOWMAN);
-		glGenBuffers(1, &body_vp_vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, body_vp_vbo);
-		glBufferData(GL_ARRAY_BUFFER, body_model.mPointCount * sizeof(vec3), &body_model.mVertices[0], GL_STATIC_DRAW);
-		glGenBuffers(1, &body_vn_vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, body_vn_vbo);
-		glBufferData(GL_ARRAY_BUFFER, body_model.mPointCount * sizeof(vec3), &body_model.mNormals[0], GL_STATIC_DRAW);
-		//Loading hat
-		hat_model = meshLoader.load_mesh(HAT);
-		glGenBuffers(1, &hat_vp_vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, hat_vp_vbo);
-		glBufferData(GL_ARRAY_BUFFER, hat_model.mPointCount * sizeof(vec3), &hat_model.mVertices[0], GL_STATIC_DRAW);
-		glGenBuffers(1, &hat_vn_vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, hat_vn_vbo);
-		glBufferData(GL_ARRAY_BUFFER, hat_model.mPointCount * sizeof(vec3), &hat_model.mNormals[0], GL_STATIC_DRAW);
-		//Loading right arm 
-		rightArm_model = meshLoader.load_mesh(RIGHT_ARM);
-		glGenBuffers(1, &rightArm_vp_vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, rightArm_vp_vbo);
-		glBufferData(GL_ARRAY_BUFFER, rightArm_model.mPointCount * sizeof(vec3), &rightArm_model.mVertices[0], GL_STATIC_DRAW);
-		glGenBuffers(1, &rightArm_vn_vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, rightArm_vn_vbo);
-		glBufferData(GL_ARRAY_BUFFER, rightArm_model.mPointCount * sizeof(vec3), &rightArm_model.mNormals[0], GL_STATIC_DRAW);
-		//Loading left arm 
-		leftArm_model = meshLoader.load_mesh(LEFT_ARM);
-		glGenBuffers(1, &leftArm_vp_vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, leftArm_vp_vbo);
-		glBufferData(GL_ARRAY_BUFFER, leftArm_model.mPointCount * sizeof(vec3), &leftArm_model.mVertices[0], GL_STATIC_DRAW);
-		glGenBuffers(1, &leftArm_vn_vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, leftArm_vn_vbo);
-		glBufferData(GL_ARRAY_BUFFER, leftArm_model.mPointCount * sizeof(vec3), &leftArm_model.mNormals[0], GL_STATIC_DRAW);
+	
+	void draw(Shader shaderProgram) {
+		mBody = glm::mat4(1.0f);
+		mBody = glm::translate(mBody, glm::vec3(posX, posY, posZ)); 
+		mBody = glm::rotate(mBody, glm::radians(angle), glm::vec3(0, 1, 0));
+		mBody = glm::rotate(mBody, glm::radians(bodyRotate), glm::vec3(1, 0, 0));
+		mBody = glm::scale(mBody, glm::vec3(size, size, size));
+		shaderProgram.setMat4("model", mBody);
+		body.Draw(shaderProgram); 
+		mHat = glm::mat4(1.0f);
+		mHat = glm::translate(mHat, glm::vec3(0.0f, 0.0f, 0.0f)); 
+		mHat = mBody * mHat;
+		shaderProgram.setMat4("model", mHat);
+		hat.Draw(shaderProgram); 
+		mRightArm = glm::mat4(1.0f);
+		//mRightArm = glm::scale(mRightArm, glm::vec3(size, size, size)); 
+		mRightArm = mRightArm * glm::rotate(glm::mat4(1.0f), glm::radians(armRotate), glm::vec3(1, 0, 0));
+		mRightArm = mBody * mRightArm; 
+		shaderProgram.setMat4("model", mRightArm);
+		rightArm.Draw(shaderProgram); 
+		mLeftArm = glm::mat4(1.0f);
+		//mLeftArm = glm::scale(mLeftArm, glm::vec3(size, size, size));
+		mLeftArm = glm::rotate(mLeftArm, glm::radians(armRotate), glm::vec3(1, 0, 0));
+		mLeftArm = mBody * mLeftArm;
+		shaderProgram.setMat4("model", mLeftArm);
+		leftArm.Draw(shaderProgram);
 	}
 
-	void draw() {
-		int matrix_location = glGetUniformLocation(shaderProgramID, "model");
-		int view_mat_location = glGetUniformLocation(shaderProgramID, "view");
-		int proj_mat_location = glGetUniformLocation(shaderProgramID, "proj");
-
-	    snowman = identity_mat4();
-		snowman = translate(snowman, snowman_pos);
-		snowman = rotate_y_deg(snowman, angle);
-		glEnableVertexAttribArray(loc1);
-		glBindBuffer(GL_ARRAY_BUFFER, body_vp_vbo);
-		glVertexAttribPointer(loc1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-		glEnableVertexAttribArray(loc2);
-		glBindBuffer(GL_ARRAY_BUFFER, body_vn_vbo);
-		glVertexAttribPointer(loc2, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-
-		glUniformMatrix4fv(matrix_location, 1, GL_FALSE, snowman.m);
-		glDrawArrays(GL_TRIANGLES, 3, body_model.mPointCount);
-
-		hat = identity_mat4();
-		hat = translate(hat, vec3(0.0f, 0.0f, 0.0f));
-		hat = rotate_y_deg(hat, rotate_y);
-		hat = snowman * hat;
-		glEnableVertexAttribArray(loc1);
-		glBindBuffer(GL_ARRAY_BUFFER, hat_vp_vbo);
-		glVertexAttribPointer(loc1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-		glEnableVertexAttribArray(loc2);
-		glBindBuffer(GL_ARRAY_BUFFER, hat_vn_vbo);
-		glVertexAttribPointer(loc2, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-
-		glUniformMatrix4fv(matrix_location, 1, GL_FALSE, hat.m);
-		glDrawArrays(GL_TRIANGLES, 3, hat_model.mPointCount);
-
-		leftArm = identity_mat4();
-		leftArm = translate(leftArm, left_arm_pos);
-		leftArm = snowman * leftArm;
-		glEnableVertexAttribArray(loc1);
-		glBindBuffer(GL_ARRAY_BUFFER, leftArm_vp_vbo);
-		glVertexAttribPointer(loc1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-		glEnableVertexAttribArray(loc2);
-		glBindBuffer(GL_ARRAY_BUFFER, leftArm_vn_vbo);
-		glVertexAttribPointer(loc2, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-
-		glUniformMatrix4fv(matrix_location, 1, GL_FALSE, leftArm.m);
-		glDrawArrays(GL_TRIANGLES, 3, leftArm_model.mPointCount);
-
-		rightArm = identity_mat4();
-		rightArm = translate(rightArm, right_arm_pos);
-
-		rightArm = snowman * rightArm;
-		glEnableVertexAttribArray(loc1);
-		glBindBuffer(GL_ARRAY_BUFFER, rightArm_vp_vbo);
-		glVertexAttribPointer(loc1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-		glEnableVertexAttribArray(loc2);
-		glBindBuffer(GL_ARRAY_BUFFER, rightArm_vn_vbo);
-		glVertexAttribPointer(loc2, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-
-		glUniformMatrix4fv(matrix_location, 1, GL_FALSE, rightArm.m);
-		glDrawArrays(GL_TRIANGLES, 3, rightArm_model.mPointCount);
-	}
-
-	void update() {
-		static DWORD last_time = 0;
-		DWORD curr_time = timeGetTime();
-		if (last_time == 0)
-			last_time = curr_time;
-		float delta = (curr_time - last_time) * 0.001f;
-		last_time = curr_time;
-		// Rotate the model slowly around the y axis at 20 degrees per second
-		rotate_y += 80.0f * delta;
-		rotate_y = fmodf(rotate_y, 360.0f);
-
-		if (left_arm_distance < 700) {
-			left_arm_distance++;
+	void bow() {
+		if (armDown) {
+			armRotate += 0.1f;
+			bodyRotate += 0.1f; 
+			armRotate = fmodf(armRotate, 360.0f);
+			bodyRotate = fmodf(bodyRotate, 360.0f);
 		}
 		else {
-			left_arm_distance = 0;
-			left_arm_up = !left_arm_up;
+			armRotate -= 0.1f;
+			bodyRotate -= 0.1f; 
+			armRotate = fmodf(armRotate, 360.0f);
+			bodyRotate = fmodf(bodyRotate, 360.0f); 
 		}
-
-		if (left_arm_up) left_arm_pos.v[1] += 0.0001f;
-		else left_arm_pos.v[1] -= 0.0001f;
-
-		if (right_arm_distance < 400) {
-			right_arm_distance++;
-		}
-		else {
-			right_arm_distance = 0;
-			right_arm_up = !right_arm_up;
-		}
-
-		if (right_arm_up) right_arm_pos.v[1] += 0.0001f;
-		else right_arm_pos.v[1] -= 0.0001f;
-
-		snowman_pos.v[2] += 0.0001f;
+		if (armRotate > 20.0f) armDown = false;
+		else if (armRotate < -5.0f) armDown = true;
 	}
 
 private: 
-	MeshLoader meshLoader = MeshLoader();
+
 	float posX, posY, posZ; 
+	float size;
 	GLfloat angle; 
-
-	unsigned int body_vn_vbo = 0;
-	unsigned int body_vp_vbo = 0;
-	unsigned int body_vao = 0;
-
-	unsigned int hat_vn_vbo = 0;
-	unsigned int hat_vp_vbo = 0;
-	unsigned int hat_vao = 0;
-
-	unsigned int leftArm_vn_vbo = 0;
-	unsigned int leftArm_vp_vbo = 0;
-	unsigned int leftArm_vao = 0;
-
-	unsigned int rightArm_vn_vbo = 0;
-	unsigned int rightArm_vp_vbo = 0;
-	unsigned int rightArm_vao = 0;
-
-	GLuint loc1, loc2, loc3;
-
-	mat4 snowman;
-	mat4 hat; 
-	mat4 leftArm; 
-	mat4 rightArm;
-
-	int left_arm_distance = 0;
-	int right_arm_distance = 0;
-	GLfloat rotate_y = 0.0f;
-	GLfloat rotate_arm = 0.0f;
-
-	GLuint shaderProgramID;
-	vec3 snowman_pos;
-	vec3 left_arm_pos = vec3(0.0f, 0.0f, 0.0f);
-	vec3 right_arm_pos = vec3(0.0f, 0.0f, 0.0f);
-	bool left_arm_up = false;
-	bool right_arm_up = false;
+	GLfloat armRotate = 0.0f; 
+	GLfloat bodyRotate = 0.0f;
+	bool armDown = true;
+	glm::mat4 mBody; 
+	glm::mat4 mHat; 
+	glm::mat4 mLeftArm; 
+	glm::mat4 mRightArm; 
 };
-
