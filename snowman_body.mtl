@@ -1,0 +1,38 @@
+# Blender 3.3.1 MTL File: 'snowman (2).blend'
+# www.blender.org
+
+newmtl carrot
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd carrot-texture.jpg
+map_Ns C:/snowman_roughness.png
+map_refl C:/snowman_metallic.png
+map_Bump -bm 1.000000 C:/snowman_normal_opengl.png
+
+newmtl snow
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd snow.JPG
+map_Ns C:/snowman_roughness.png
+map_refl C:/snowman_metallic.png
+map_Bump -bm 1.000000 C:/snowman_normal_opengl.png
+
+newmtl stone-texture
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd stone-texture.jpg
+map_Ns C:/snowman_roughness.png
+map_refl C:/snowman_metallic.png
+map_Bump -bm 1.000000 C:/snowman_normal_opengl.png

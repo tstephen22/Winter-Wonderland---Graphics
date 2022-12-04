@@ -1,17 +1,22 @@
 ﻿  main.cpp
-C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland---Graphics\Lab04\camera.h(122,1): warning C4305: 'initializing': truncation from 'double' to 'float'
-C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland---Graphics\Lab04\Misc.h(30,1): warning C5208: unnamed class used in typedef name cannot declare members other than non-static data members, member enumerations, or member classes
-C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland---Graphics\Lab04\main.cpp(432,38): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland---Graphics\Lab04\main.cpp(435,35): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland---Graphics\Lab04\main.cpp(438,36): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland---Graphics\Lab04\main.cpp(441,39): warning C4305: 'argument': truncation from 'double' to 'float'
-C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland---Graphics\Lab04\main.cpp(453,10): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland---Graphics\Lab04\main.cpp(454,10): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland---Graphics\Lab04\main.cpp(462,17): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland---Graphics\Lab04\main.cpp(463,18): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland---Graphics\Lab04\main.cpp(467,17): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland---Graphics\Lab04\main.cpp(468,18): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-  Mountains.cpp
-C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland---Graphics\Lab04\Misc.h(30,1): warning C5208: unnamed class used in typedef name cannot declare members other than non-static data members, member enumerations, or member classes
-  Generating Code...
-  Lab04.vcxproj -> C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland---Graphics\build\executables\Debug\Lab 04.exe
+main.obj : error LNK2019: unresolved external symbol _glfwInit referenced in function _main
+main.obj : error LNK2019: unresolved external symbol _glfwTerminate referenced in function _main
+main.obj : error LNK2019: unresolved external symbol _glfwWindowHint referenced in function _main
+main.obj : error LNK2019: unresolved external symbol _glfwCreateWindow referenced in function _main
+main.obj : error LNK2019: unresolved external symbol _glfwWindowShouldClose referenced in function _main
+main.obj : error LNK2019: unresolved external symbol _glfwSetWindowShouldClose referenced in function "void __cdecl processInput(struct GLFWwindow *)" (?processInput@@YAXPAUGLFWwindow@@@Z)
+main.obj : error LNK2019: unresolved external symbol _glfwSetFramebufferSizeCallback referenced in function _main
+main.obj : error LNK2019: unresolved external symbol _glfwPollEvents referenced in function _main
+main.obj : error LNK2019: unresolved external symbol _glfwSetInputMode referenced in function _main
+main.obj : error LNK2019: unresolved external symbol _glfwGetKey referenced in function "void __cdecl processInput(struct GLFWwindow *)" (?processInput@@YAXPAUGLFWwindow@@@Z)
+main.obj : error LNK2019: unresolved external symbol _glfwSetCursorPosCallback referenced in function _main
+main.obj : error LNK2019: unresolved external symbol _glfwSetScrollCallback referenced in function _main
+main.obj : error LNK2019: unresolved external symbol _glfwGetTime referenced in function _main
+main.obj : error LNK2019: unresolved external symbol _glfwMakeContextCurrent referenced in function _main
+main.obj : error LNK2019: unresolved external symbol _glfwSwapBuffers referenced in function _main
+main.obj : error LNK2019: unresolved external symbol _glfwGetProcAddress referenced in function _main
+main.obj : error LNK2019: unresolved external symbol _stbi_load referenced in function "unsigned int __cdecl TextureFromFile(char const *,class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > const &,bool)" (?TextureFromFile@@YAIPBDABV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@_N@Z)
+main.obj : error LNK2019: unresolved external symbol _stbi_image_free referenced in function "unsigned int __cdecl TextureFromFile(char const *,class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > const &,bool)" (?TextureFromFile@@YAIPBDABV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@_N@Z)
+main.obj : error LNK2019: unresolved external symbol _stbi_set_flip_vertically_on_load referenced in function _main
+C:\Users\theos\OneDrive\Desktop\College\4th Year\Graphics\Lab3\Lab 04 - Sample Object Hierarchy(1)\Lab 04 - Sample Object Hierarchy\libs\glfw\glfw3.lib : warning LNK4272: library machine type 'x64' conflicts with target machine type 'x86'
+C:\Users\theos\OneDrive\Desktop\College\4th Year\Graphics\Lab3\Lab 04 - Sample Object Hierarchy(1)\Lab 04 - Sample Object Hierarchy\\build\executables\Debug\Lab 04.exe : fatal error LNK1120: 19 unresolved externals

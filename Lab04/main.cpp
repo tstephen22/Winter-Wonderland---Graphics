@@ -8,6 +8,7 @@
 #include "shader_m.h"
 #include "camera.h"
 #include "model.h"
+#include "Snowman.h"
 #include "file_system.h"
 #include <iostream>
 
@@ -17,8 +18,8 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
 
 // settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1600;
+const unsigned int SCR_HEIGHT = 1200;
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -29,7 +30,8 @@ bool firstMouse = true;
 // timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
-
+int SNOWMEN_COUNT = 3;
+vector<Snowman> SNOWMEN;
 int main()
 {
     // glfw: initialize and configure
@@ -81,8 +83,13 @@ int main()
 
     // load models
     // -----------
-    Model ourModel(FileSystem::getPath("hat.obj"));
-
+    Model ourModel(FileSystem::getPath("mountains.obj"));
+    Snowman snowman(0.0, 0.0, 0.0, 1.0, 1.0); 
+    for (int i = 0; i < SNOWMEN_COUNT; i++) {
+        for (int j = 0; j < SNOWMEN_COUNT; j++) {
+            SNOWMEN.push_back(Snowman(-1 + i, 0.0, 2.0+j, -180.0, 0.1));
+        }
+    }
 
     // draw in wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -96,7 +103,7 @@ int main()
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-
+   
         // input
         // -----
         processInput(window);
@@ -118,10 +125,14 @@ int main()
         // render the loaded model
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
         ourShader.setMat4("model", model);
         ourModel.Draw(ourShader);
 
+        snowman.draw(ourShader);
+        for (int i = 0; i < SNOWMEN.size(); i++) {
+            SNOWMEN[i].bow();
+            SNOWMEN[i].draw(ourShader);
+        }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
