@@ -9,9 +9,9 @@ Ni 1.450000
 d 1.000000
 illum 2
 map_Kd carrot-texture.jpg
-map_Ns C:/snowman_roughness.png
-map_refl C:/snowman_metallic.png
-map_Bump -bm 1.000000 C:/snowman_normal_opengl.png
+map_Ns textures/snowman_roughness.png
+map_refl textures/snowman_metallic.png
+map_Bump -bm 1.000000 textures/snowman_normal_opengl.png
 
 newmtl snow
 Ka 1.000000 1.000000 1.000000
@@ -21,9 +21,9 @@ Ni 1.450000
 d 1.000000
 illum 2
 map_Kd snow.JPG
-map_Ns C:/snowman_roughness.png
-map_refl C:/snowman_metallic.png
-map_Bump -bm 1.000000 C:/snowman_normal_opengl.png
+map_Ks texture_specular1.png
+map_refl textures/snowman_metallic.png
+map_Bump -bm 1.000000 textures/snowman_normal_opengl.png
 
 newmtl stone-texture
 Ka 1.000000 1.000000 1.000000
@@ -33,6 +33,6 @@ Ni 1.450000
 d 1.000000
 illum 2
 map_Kd stone-texture.jpg
-map_Ns C:/snowman_roughness.png
-map_refl C:/snowman_metallic.png
-map_Bump -bm 1.000000 C:/snowman_normal_opengl.png
+map_Ns textures/snowman_roughness.png
+map_refl textures/snowman_metallic.png
+map_Bump -bm 1.000000 textures/snowman_normal_opengl.png
