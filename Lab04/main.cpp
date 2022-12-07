@@ -9,7 +9,9 @@
 #include "camera.h"
 #include "model.h"
 #include "Snowman.h"
+#include "skybox.h"
 #include "file_system.h"
+#include "Statue.h"
 #include <iostream>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -80,19 +82,18 @@ int main()
     // build and compile shaders
     // -------------------------
     Shader ourShader("vertex.vs", "fragment.fs");
-
+    Skybox skybox; 
     // load models
     // -----------
     Model ourModel(FileSystem::getPath("mountains.obj"));
-    Snowman snowman(0.0, 0.0, 0.0, 1.0, 1.0); 
+    Statue statue(0.0, 0.0, 0.0, 1.0, 1.0); 
     for (int i = 0; i < SNOWMEN_COUNT; i++) {
         for (int j = 0; j < SNOWMEN_COUNT; j++) {
             SNOWMEN.push_back(Snowman(-1 + i, 0.0, 2.0+j, -180.0, 0.1));
         }
     }
-
-    // draw in wireframe
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    skybox.loadSky(); 
+    glEnable(GL_DEPTH_TEST);
 
     // render loop
     // -----------
@@ -115,6 +116,13 @@ int main()
 
         // don't forget to enable shader before setting uniforms
         ourShader.use();
+        ourShader.setVec3("light.direction", -0.2f, -1.0f, -0.3f);
+        ourShader.setVec3("viewPos", camera.Position);
+        // light properties
+        ourShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+        ourShader.setVec3("light.diffuse", 0.75f, 0.75f, 0.75f);
+        ourShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
 
         // view/projection transformations
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
@@ -126,14 +134,17 @@ int main()
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
         ourShader.setMat4("model", model);
+        
         ourModel.Draw(ourShader);
-
-        snowman.draw(ourShader);
+        ourShader.setFloat("material.shininess", 32.0f);
         for (int i = 0; i < SNOWMEN.size(); i++) {
             SNOWMEN[i].bow();
             SNOWMEN[i].draw(ourShader);
         }
 
+        statue.draw(ourShader);
+
+        skybox.draw(projection, view, camera);
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
