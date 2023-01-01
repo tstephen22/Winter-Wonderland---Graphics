@@ -33,7 +33,9 @@ public:
 		this->leftArm = Model(FileSystem::getPath(LEFT_ARM));
 		this->size = size; 
 	}
-	
+	Snowman() {
+
+	}
 	void draw(Shader shaderProgram) {
 		mBody = glm::mat4(1.0f);
 		mBody = glm::translate(mBody, glm::vec3(posX, posY, posZ)); 
@@ -47,20 +49,20 @@ public:
 		mHat = mBody * mHat;
 		shaderProgram.setMat4("model", mHat);
 		hat.Draw(shaderProgram); 
-		mRightArm = glm::mat4(1.0f);
-		//mRightArm = glm::scale(mRightArm, glm::vec3(size, size, size)); 
+		mRightArm = glm::mat4(1.0f); 
 		mRightArm = mRightArm * glm::rotate(glm::mat4(1.0f), glm::radians(armRotate), glm::vec3(1, 0, 0));
 		mRightArm = mBody * mRightArm; 
 		shaderProgram.setMat4("model", mRightArm);
 		rightArm.Draw(shaderProgram); 
 		mLeftArm = glm::mat4(1.0f);
-		//mLeftArm = glm::scale(mLeftArm, glm::vec3(size, size, size));
 		mLeftArm = glm::rotate(mLeftArm, glm::radians(armRotate), glm::vec3(1, 0, 0));
 		mLeftArm = mBody * mLeftArm;
 		shaderProgram.setMat4("model", mLeftArm);
 		leftArm.Draw(shaderProgram);
 	}
-
+	void runInCircle() {
+		
+	}
 	void bow() {
 		if (armDown) {
 			armRotate += 0.1f;

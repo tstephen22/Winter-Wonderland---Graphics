@@ -77,8 +77,8 @@
     <LibraryPath>C:\Users\theos\OneDrive\Desktop\College\4th Year\Graphics\Lab3\Lab 04 - Sample Object Hierarchy%281%29\Lab 04 - Sample Object Hierarchy\libs;C:\Users\theos\OneDrive\Desktop\College\4th Year\Graphics\Lab3\Lab 04 - Sample Object Hierarchy%281%29\Lab 04 - Sample Object Hierarchy\libs\glfw;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland-New\Winter-Wonderland---Graphics\glad %281%29\include;C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland-New\Winter-Wonderland---Graphics\include;C:\Users\theos_000\Desktop\Graphics Project\glm;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland-New\Winter-Wonderland---Graphics\libs;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\theos\OneDrive\Desktop\College\4th Year\Graphics\Lab3\Lab 04 - Sample Object Hierarchy%281%29\Lab 04 - Sample Object Hierarchy\glad %281%29\include;C:\Users\theos\OneDrive\Desktop\College\4th Year\Graphics\Lab3\Lab 04 - Sample Object Hierarchy%281%29\Lab 04 - Sample Object Hierarchy\include;C:\Users\theos\OneDrive\Desktop\College\4th Year\Graphics\glm;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\theos\OneDrive\Desktop\College\4th Year\Graphics\Lab3\Lab 04 - Sample Object Hierarchy%281%29\Lab 04 - Sample Object Hierarchy\libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)\build\executables\$(Configuration)\</OutDir>
@@ -104,7 +104,7 @@
       <AdditionalIncludeDirectories>C:\Users\theos\OneDrive\Desktop\College\4th Year\Graphics\Lab3\Lab 04 - Sample Object Hierarchy%281%29\Lab 04 - Sample Object Hierarchy\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>C:\Users\theos_000\Desktop\Graphics Project\Winter-Wonderland-New\Winter-Wonderland---Graphics\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\theos\OneDrive\Desktop\College\4th Year\Graphics\Lab3\Lab 04 - Sample Object Hierarchy%281%29\Lab 04 - Sample Object Hierarchy\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;assimp-vc142-mtd.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

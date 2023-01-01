@@ -3,7 +3,7 @@
 
 #include <string>
 #include <cstdlib>
-const char* logl_root = "C:/Users/theos_000/Desktop/Graphics Project/Winter-Wonderland-New/Winter-Wonderland---Graphics";
+const char* logl_root = "C:/Users/theos/OneDrive/Desktop/College/4th Year/Graphics/Lab3/Lab 04 - Sample Object Hierarchy(1)/Lab 04 - Sample Object Hierarchy";
 
 class FileSystem
 {

@@ -34,6 +34,8 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 int SNOWMEN_COUNT = 3;
 vector<Snowman> SNOWMEN;
+Snowman testMan;
+Statue statue;
 int main()
 {
     // glfw: initialize and configure
@@ -83,15 +85,16 @@ int main()
     // -------------------------
     Shader ourShader("vertex.vs", "fragment.fs");
     Skybox skybox; 
+    statue = Statue(0.0, 0.0, 0.0, 1.0, 1.0);
     // load models
     // -----------
-    Model ourModel(FileSystem::getPath("mountains.obj"));
-    Statue statue(0.0, 0.0, 0.0, 1.0, 1.0); 
+    Model ourModel(FileSystem::getPath("mountains.obj")); 
     for (int i = 0; i < SNOWMEN_COUNT; i++) {
         for (int j = 0; j < SNOWMEN_COUNT; j++) {
             SNOWMEN.push_back(Snowman(-1 + i, 0.0, 2.0+j, -180.0, 0.1));
         }
     }
+    testMan = Snowman(0.0, 0.0, 1.0, 90.0, 0.1);
     skybox.loadSky(); 
     glEnable(GL_DEPTH_TEST);
 
@@ -116,14 +119,13 @@ int main()
 
         // don't forget to enable shader before setting uniforms
         ourShader.use();
-        ourShader.setVec3("light.direction", -0.2f, -1.0f, -0.3f);
+        ourShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
         ourShader.setVec3("viewPos", camera.Position);
         // light properties
-        ourShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
-        ourShader.setVec3("light.diffuse", 0.75f, 0.75f, 0.75f);
-        ourShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
-
-
+        ourShader.setVec3("dirLight.ambient", 0.2f, 0.2f, 0.2f);
+        ourShader.setVec3("dirLight.diffuse", 0.75f, 0.75f, 0.75f);
+        ourShader.setVec3("dirLight.specular", 1.0f, 1.0f, 1.0f);
+    
         // view/projection transformations
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
@@ -141,10 +143,11 @@ int main()
             SNOWMEN[i].bow();
             SNOWMEN[i].draw(ourShader);
         }
-
-        statue.draw(ourShader);
+        testMan.draw(ourShader);
+        statue.draw(ourShader, view, projection);
 
         skybox.draw(projection, view, camera);
+            
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
@@ -172,6 +175,8 @@ void processInput(GLFWwindow* window)
         camera.ProcessKeyboard(LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
+        statue.toggleDisco();
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
